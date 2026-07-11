@@ -15,10 +15,6 @@
       project: "空白地热搜榜",
       summary: "原驻地突然出现大量鸡，匿名目击者正在追查放鸡者身份。",
       tags: ["空白地", "原驻地", "放鸡"],
-      heat: 15880,
-      likes: 731,
-      dislikes: 24,
-      trend: "up",
       approvedAt: "2026-07-11T23:10:00+08:00"
     },
     {
@@ -27,10 +23,6 @@
       project: "空白地热搜榜",
       summary: "多名玩家声称在空白地上空看到异常漂浮现象，系统暂无解释。",
       tags: ["空白地", "异常", "目击"],
-      heat: 14960,
-      likes: 689,
-      dislikes: 19,
-      trend: "up",
       approvedAt: "2026-07-11T22:55:00+08:00"
     },
     {
@@ -39,10 +31,6 @@
       project: "空白地热搜榜",
       summary: "副本登记处出现疑似前世工牌，系统短暂沉默后仍未公开说明。",
       tags: ["副本", "系统", "前世"],
-      heat: 14120,
-      likes: 642,
-      dislikes: 31,
-      trend: "up",
       approvedAt: "2026-07-11T22:40:00+08:00"
     }
   ];
@@ -204,12 +192,10 @@
         title: String(item.title || ""),
         project: String(item.project || "匿名企划"),
         summary: String(item.summary || ""),
-        tags: Array.isArray(item.tags) ? item.tags.map(String).slice(0, 5) : [],
-        heat: Number(item.heat || 0),
+        tags: normalizeTags(item.tags),
         likes: Number(item.likes || 0),
         dislikes: Number(item.dislikes || 0),
-        trend: ["up", "down", "flat"].includes(item.trend) ? item.trend : "flat",
-        approvedAt: item.approvedAt || item.createdAt || ""
+        approvedAt: item.approvedAt || item.createdAt || item.created_at || ""
       }));
   }
 
@@ -233,12 +219,12 @@
       const selectedVote = state.votes[item.id] || "";
 
       node.querySelector(".rank-number").textContent = `#${index + 1}`;
-      setTrend(node.querySelector(".rank-trend"), item.trend);
+      setTrend(node.querySelector(".rank-trend"), counts);
       node.querySelector(".project-name").textContent = item.project;
       node.querySelector(".item-title").textContent = item.title;
       node.querySelector(".item-summary").textContent = item.summary;
       node.querySelector(".heat-score").textContent = formatNumber(score);
-      node.querySelector(".meter span").style.setProperty("--meter-width", `${Math.max(8, Math.round((score / peak) * 100))}%`);
+      node.querySelector(".meter span").style.setProperty("--meter-width", `${score > 0 ? Math.max(8, Math.round((score / peak) * 100)) : 0}%`);
       node.dataset.itemId = item.id;
 
       const tagRow = node.querySelector(".tag-row");
@@ -283,17 +269,16 @@
     });
   }
 
-  function setTrend(element, trend) {
-    const text = trend === "up" ? "上升" : trend === "down" ? "回落" : "持平";
+  function setTrend(element, counts) {
+    const text = counts.likes === 0 && counts.dislikes === 0 ? "新" : counts.dislikes > counts.likes ? "争议" : "升温";
     element.textContent = text;
-    element.classList.toggle("is-down", trend === "down");
-    element.classList.toggle("is-flat", trend === "flat");
+    element.classList.toggle("is-down", counts.dislikes > counts.likes);
+    element.classList.toggle("is-flat", counts.likes === 0 && counts.dislikes === 0);
   }
 
   function getScore(item) {
     const counts = getDisplayCounts(item);
-    const trendBonus = item.trend === "up" ? 260 : item.trend === "down" ? -160 : 0;
-    return Math.max(0, Math.round(item.heat + counts.likes * 8 - counts.dislikes * 5 + trendBonus));
+    return Math.max(0, counts.likes - counts.dislikes);
   }
 
   function getDisplayCounts(item) {
@@ -482,9 +467,15 @@
   }
 
   function parseTags(value) {
-    return String(value || "")
+    return normalizeTags(
+      String(value || "")
       .split(/[，,、\s]+/)
-      .map((tag) => tag.trim())
+    );
+  }
+
+  function normalizeTags(tags) {
+    return (Array.isArray(tags) ? tags : [])
+      .map((tag) => String(tag || "").trim().replace(/^#+/, ""))
       .filter(Boolean)
       .slice(0, 5);
   }

@@ -33,15 +33,31 @@
   "project": "企划名",
   "summary": "一句话概要",
   "tags": ["招募", "活动"],
-  "heat": 1000,
-  "likes": 0,
-  "dislikes": 0,
-  "trend": "up",
   "approvedAt": "2026-07-11T12:00:00+08:00"
 }
 ```
 
-`trend` 可用 `up`、`flat`、`down`。
+`likes`、`dislikes`、`heat`、`trend` 都不用手填。页面会把未投票的新热搜当作 0 净热，默认排序按 `点赞 - 踩`，点赞排序按纯点赞数。
+
+从 Supabase Table Editor 复制出来的投稿通常会长这样：
+
+```json
+{
+  "idx": 0,
+  "id": "b72c7c88-081b-45ba-8a9f-f6bb76992445",
+  "title": "设计师的恶趣味",
+  "project": "空白地",
+  "summary": "希望大家喜欢设计师给大家的礼物～",
+  "tags": ["#设计师", "#空白地"],
+  "link": null,
+  "reason": "给站主看的审核理由",
+  "client_id": "anon_xxx",
+  "status": "pending",
+  "created_at": "2026-07-11 16:22:29.454855+00"
+}
+```
+
+复制进 `data/hotlist.json` 时，只保留 `id`、`title`、`project`、`summary`、`tags`，把 `created_at` 改名为 `approvedAt` 就够了。页面也会自动处理标签开头的 `#`。
 
 ## 投稿和点赞配置
 
