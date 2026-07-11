@@ -10,40 +10,40 @@
 
   const fallbackItems = [
     {
-      id: "moonfall-port-season-2",
-      title: "月坠港二期开启",
-      project: "月坠港档案",
-      summary: "港区地图、阵营委托和新角色登记同步开放，首日招募热度冲上榜首。",
-      tags: ["招募", "世界观", "活动"],
-      heat: 9820,
-      likes: 421,
-      dislikes: 17,
+      id: "blankland-chicken-origin",
+      title: "爆！#在原驻地大肆放鸡の人到底是何方神圣#",
+      project: "空白地热搜榜",
+      summary: "原驻地突然出现大量鸡，匿名目击者正在追查放鸡者身份。",
+      tags: ["空白地", "原驻地", "放鸡"],
+      heat: 15880,
+      likes: 731,
+      dislikes: 24,
       trend: "up",
-      approvedAt: "2026-07-10T18:20:00+08:00"
+      approvedAt: "2026-07-11T23:10:00+08:00"
     },
     {
-      id: "redline-court-election",
-      title: "红线审判庭换届",
-      project: "绛星纪事",
-      summary: "审判席位开放匿名提名，多个旧案角色线被重新整理。",
-      tags: ["阵营", "剧情", "投票"],
-      heat: 8610,
-      likes: 366,
-      dislikes: 28,
+      id: "blankland-floating-player",
+      title: "#我是疯了吗怎么会看到人在天上飘#",
+      project: "空白地热搜榜",
+      summary: "多名玩家声称在空白地上空看到异常漂浮现象，系统暂无解释。",
+      tags: ["空白地", "异常", "目击"],
+      heat: 14960,
+      likes: 689,
+      dislikes: 19,
       trend: "up",
-      approvedAt: "2026-07-09T21:35:00+08:00"
+      approvedAt: "2026-07-11T22:55:00+08:00"
     },
     {
-      id: "mist-school-open-day",
-      title: "海雾学院开放日",
-      project: "海雾学院",
-      summary: "课程表、社团摊位和交换生名额释出，适合轻量日常向角色加入。",
-      tags: ["校园", "日常", "轻量"],
-      heat: 7440,
-      likes: 287,
-      dislikes: 11,
-      trend: "flat",
-      approvedAt: "2026-07-08T12:10:00+08:00"
+      id: "blankland-past-work-card",
+      title: "#震惊某玩家竟在副本登记处提交前世工牌系统为何沉默三秒#",
+      project: "空白地热搜榜",
+      summary: "副本登记处出现疑似前世工牌，系统短暂沉默后仍未公开说明。",
+      tags: ["副本", "系统", "前世"],
+      heat: 14120,
+      likes: 642,
+      dislikes: 31,
+      trend: "up",
+      approvedAt: "2026-07-11T22:40:00+08:00"
     }
   ];
 
@@ -51,7 +51,9 @@
     items: [],
     sort: "hot",
     query: "",
-    votes: readJson(STORAGE_KEYS.votes, {})
+    votes: readJson(STORAGE_KEYS.votes, {}),
+    remoteCounts: {},
+    supabaseAvailable: hasSupabaseConfig()
   };
 
   const formatter = new Intl.NumberFormat("zh-CN", {
@@ -80,6 +82,10 @@
     setModes();
     state.items = await loadHotItems();
     render();
+    await loadRemoteVoteCounts();
+    if (hasSupabaseConfig()) {
+      window.setInterval(loadRemoteVoteCounts, 15000);
+    }
     updateExportButton();
   }
 
@@ -117,9 +123,66 @@
   }
 
   function setModes() {
-    elements.voteMode.textContent = CONFIG.VOTE_ENDPOINT ? "实时" : "本机";
-    elements.submitMode.textContent = CONFIG.SUBMISSION_ENDPOINT || CONFIG.OWNER_EMAIL ? "在线" : "本机";
-    document.title = CONFIG.SITE_NAME || "OC企划热搜榜";
+    elements.voteMode.textContent = hasSupabaseConfig() || CONFIG.VOTE_ENDPOINT ? "实时" : "本机";
+    elements.submitMode.textContent = hasSupabaseConfig() || CONFIG.SUBMISSION_ENDPOINT || CONFIG.OWNER_EMAIL ? "在线" : "本机";
+    document.title = CONFIG.SITE_NAME || "空白地热搜榜";
+  }
+
+  function hasSupabaseConfig() {
+    return Boolean(getSupabaseUrl() && getSupabaseKey());
+  }
+
+  function getSupabaseUrl() {
+    return String(CONFIG.SUPABASE_URL || "").trim().replace(/\/+$/, "");
+  }
+
+  function getSupabaseKey() {
+    return String(CONFIG.SUPABASE_PUBLISHABLE_KEY || CONFIG.SUPABASE_ANON_KEY || "").trim();
+  }
+
+  async function supabaseRpc(functionName, body) {
+    const response = await fetch(`${getSupabaseUrl()}/rest/v1/rpc/${functionName}`, {
+      method: "POST",
+      headers: {
+        apikey: getSupabaseKey(),
+        Authorization: `Bearer ${getSupabaseKey()}`,
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      },
+      body: JSON.stringify(body || {})
+    });
+
+    if (!response.ok) {
+      const detail = await response.text().catch(() => "");
+      throw new Error(`${functionName} failed: ${response.status} ${detail}`);
+    }
+
+    if (response.status === 204) return null;
+    return response.json();
+  }
+
+  async function loadRemoteVoteCounts() {
+    if (!hasSupabaseConfig()) return;
+
+    try {
+      const rows = await supabaseRpc("get_vote_counts", {});
+      state.remoteCounts = {};
+
+      (Array.isArray(rows) ? rows : []).forEach((row) => {
+        state.remoteCounts[row.item_id] = {
+          likes: Number(row.likes || 0),
+          dislikes: Number(row.dislikes || 0)
+        };
+      });
+
+      state.supabaseAvailable = true;
+      elements.voteMode.textContent = "实时";
+      render();
+    } catch (error) {
+      state.supabaseAvailable = false;
+      elements.voteMode.textContent = "本机";
+      render();
+    }
   }
 
   async function loadHotItems() {
@@ -234,6 +297,14 @@
   }
 
   function getDisplayCounts(item) {
+    if (state.supabaseAvailable) {
+      const remote = state.remoteCounts[item.id] || { likes: 0, dislikes: 0 };
+      return {
+        likes: Math.max(0, item.likes + remote.likes),
+        dislikes: Math.max(0, item.dislikes + remote.dislikes)
+      };
+    }
+
     const vote = state.votes[item.id];
     return {
       likes: Math.max(0, item.likes + (vote === "like" ? 1 : 0)),
@@ -251,6 +322,34 @@
     if (!nextVote) delete state.votes[itemId];
     writeJson(STORAGE_KEYS.votes, state.votes);
     render();
+
+    if (hasSupabaseConfig() && state.supabaseAvailable) {
+      try {
+        const rows = await supabaseRpc("cast_vote", {
+          p_item_id: itemId,
+          p_client_id: getClientId(),
+          p_vote: nextVote
+        });
+
+        const result = Array.isArray(rows) ? rows[0] : rows;
+        if (result && result.item_id) {
+          state.remoteCounts[result.item_id] = {
+            likes: Number(result.likes || 0),
+            dislikes: Number(result.dislikes || 0)
+          };
+        }
+
+        elements.voteMode.textContent = "实时";
+        render();
+        return;
+      } catch (error) {
+        state.supabaseAvailable = false;
+        elements.voteMode.textContent = "本机";
+        render();
+        showStatus("投票同步失败，已暂存于本机", true);
+        return;
+      }
+    }
 
     if (!CONFIG.VOTE_ENDPOINT) return;
 
@@ -303,7 +402,10 @@
     }
 
     try {
-      if (CONFIG.SUBMISSION_ENDPOINT) {
+      if (hasSupabaseConfig() && state.supabaseAvailable) {
+        await postSupabaseSubmission(payload);
+        showStatus("已提交到待审核箱");
+      } else if (CONFIG.SUBMISSION_ENDPOINT) {
         await postSubmission(payload);
         showStatus("已提交，等待站主审核");
       } else {
@@ -334,9 +436,21 @@
     if (!response.ok) throw new Error("submission endpoint failed");
   }
 
+  async function postSupabaseSubmission(payload) {
+    await supabaseRpc("submit_hot_item", {
+      p_title: payload.title,
+      p_project: payload.project,
+      p_summary: payload.summary,
+      p_tags: payload.tags,
+      p_link: payload.link || "",
+      p_reason: payload.reason || "",
+      p_client_id: getClientId()
+    });
+  }
+
   function maybeOpenMail(payload) {
     if (!CONFIG.OWNER_EMAIL) return;
-    const subject = encodeURIComponent(`[OC热搜投稿] ${payload.title}`);
+    const subject = encodeURIComponent(`[空白地热搜投稿] ${payload.title}`);
     const body = encodeURIComponent(JSON.stringify(payload, null, 2));
     window.location.href = `mailto:${CONFIG.OWNER_EMAIL}?subject=${subject}&body=${body}`;
   }
