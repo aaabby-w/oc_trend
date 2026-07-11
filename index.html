@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#11100e" />
+    <title>OC企划热搜榜</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="site-grid" aria-hidden="true"></div>
+
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#rank" aria-label="OC企划热搜榜">
+          <span class="brand-mark">OC</span>
+          <span class="brand-copy">
+            <strong>OC企划热搜榜</strong>
+            <small>Anonymous Trend Board</small>
+          </span>
+        </a>
+
+        <nav class="topnav" aria-label="主导航">
+          <a href="#rank">榜单</a>
+          <a href="#submit">投稿</a>
+          <a href="#status">状态</a>
+        </nav>
+      </header>
+
+      <main class="workspace">
+        <section class="rank-board" id="rank" aria-labelledby="rank-title">
+          <div class="board-heading">
+            <div>
+              <p class="eyebrow">LIVE INDEX</p>
+              <h1 id="rank-title">匿名热搜</h1>
+            </div>
+
+            <div class="stat-strip" aria-label="榜单统计">
+              <div>
+                <span id="totalCount">0</span>
+                <small>上榜</small>
+              </div>
+              <div>
+                <span id="peakHeat">0</span>
+                <small>峰值热度</small>
+              </div>
+              <div>
+                <span id="voteMode">本机</span>
+                <small>投票</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="toolbar" aria-label="榜单工具">
+            <label class="search-box">
+              <span aria-hidden="true">⌕</span>
+              <input id="searchInput" type="search" placeholder="搜索企划、标题、标签" autocomplete="off" />
+            </label>
+
+            <div class="segmented" role="tablist" aria-label="排序方式">
+              <button class="is-active" type="button" data-sort="hot">热度</button>
+              <button type="button" data-sort="new">最新</button>
+              <button type="button" data-sort="likes">点赞</button>
+            </div>
+          </div>
+
+          <div class="hot-list" id="hotList" aria-live="polite"></div>
+        </section>
+
+        <aside class="side-rail">
+          <section class="submission-panel" id="submit" aria-labelledby="submit-title">
+            <div class="panel-heading">
+              <p class="eyebrow">SUBMIT</p>
+              <h2 id="submit-title">匿名投稿</h2>
+            </div>
+
+            <form id="submitForm" class="submission-form">
+              <label>
+                <span>热搜标题</span>
+                <input name="title" maxlength="34" required placeholder="例：月坠港二期开启" />
+              </label>
+
+              <label>
+                <span>所属企划</span>
+                <input name="project" maxlength="28" required placeholder="企划名" />
+              </label>
+
+              <label>
+                <span>一句话概要</span>
+                <textarea name="summary" maxlength="160" rows="4" required placeholder="发生了什么，为什么值得上榜"></textarea>
+              </label>
+
+              <label>
+                <span>标签</span>
+                <input name="tags" maxlength="60" placeholder="招募, 世界观, 活动" />
+              </label>
+
+              <label>
+                <span>相关链接</span>
+                <input name="link" type="url" placeholder="https://..." />
+              </label>
+
+              <label>
+                <span>上榜理由</span>
+                <textarea name="reason" maxlength="280" rows="3" placeholder="给站主看的审核信息"></textarea>
+              </label>
+
+              <label class="check-row">
+                <input name="privacy" type="checkbox" required />
+                <span>投稿中不包含真实身份信息</span>
+              </label>
+
+              <button class="submit-button" type="submit">
+                <span aria-hidden="true">↑</span>
+                提交审核
+              </button>
+
+              <p class="form-status" id="submitStatus" role="status"></p>
+            </form>
+          </section>
+
+          <section class="status-panel" id="status" aria-labelledby="status-title">
+            <div class="panel-heading">
+              <p class="eyebrow">STATUS</p>
+              <h2 id="status-title">站点状态</h2>
+            </div>
+
+            <dl class="status-grid">
+              <div>
+                <dt>身份</dt>
+                <dd>匿名</dd>
+              </div>
+              <div>
+                <dt>评论</dt>
+                <dd>关闭</dd>
+              </div>
+              <div>
+                <dt>投稿</dt>
+                <dd id="submitMode">待配置</dd>
+              </div>
+              <div>
+                <dt>审核</dt>
+                <dd>人工</dd>
+              </div>
+            </dl>
+
+            <button class="ghost-button" id="exportSubmissions" type="button" hidden>
+              导出本机投稿
+            </button>
+          </section>
+        </aside>
+      </main>
+    </div>
+
+    <template id="hotItemTemplate">
+      <article class="hot-item">
+        <div class="rank-cell">
+          <strong class="rank-number"></strong>
+          <span class="rank-trend"></span>
+        </div>
+
+        <div class="item-main">
+          <div class="item-head">
+            <div>
+              <p class="project-name"></p>
+              <h2 class="item-title"></h2>
+            </div>
+            <div class="heat-block">
+              <strong class="heat-score"></strong>
+              <span>热度</span>
+            </div>
+          </div>
+
+          <p class="item-summary"></p>
+          <div class="tag-row"></div>
+
+          <div class="item-foot">
+            <div class="meter" aria-hidden="true">
+              <span></span>
+            </div>
+
+            <div class="vote-row" aria-label="投票">
+              <button class="vote-button" type="button" data-vote="like">
+                <span aria-hidden="true">▲</span>
+                <strong class="like-count"></strong>
+              </button>
+              <button class="vote-button" type="button" data-vote="dislike">
+                <span aria-hidden="true">▼</span>
+                <strong class="dislike-count"></strong>
+              </button>
+            </div>
+          </div>
+        </div>
+      </article>
+    </template>
+
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

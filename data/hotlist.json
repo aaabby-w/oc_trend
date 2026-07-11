@@ -1,0 +1,74 @@
+[
+  {
+    "id": "moonfall-port-season-2",
+    "title": "月坠港二期开启",
+    "project": "月坠港档案",
+    "summary": "港区地图、阵营委托和新角色登记同步开放，首日招募热度冲上榜首。",
+    "tags": ["招募", "世界观", "活动"],
+    "heat": 9820,
+    "likes": 421,
+    "dislikes": 17,
+    "trend": "up",
+    "approvedAt": "2026-07-10T18:20:00+08:00"
+  },
+  {
+    "id": "redline-court-election",
+    "title": "红线审判庭换届",
+    "project": "绛星纪事",
+    "summary": "审判席位开放匿名提名，多个旧案角色线被重新整理。",
+    "tags": ["阵营", "剧情", "投票"],
+    "heat": 8610,
+    "likes": 366,
+    "dislikes": 28,
+    "trend": "up",
+    "approvedAt": "2026-07-09T21:35:00+08:00"
+  },
+  {
+    "id": "mist-school-open-day",
+    "title": "海雾学院开放日",
+    "project": "海雾学院",
+    "summary": "课程表、社团摊位和交换生名额释出，适合轻量日常向角色加入。",
+    "tags": ["校园", "日常", "轻量"],
+    "heat": 7440,
+    "likes": 287,
+    "dislikes": 11,
+    "trend": "flat",
+    "approvedAt": "2026-07-08T12:10:00+08:00"
+  },
+  {
+    "id": "snowfield-contract",
+    "title": "雪原契约补档",
+    "project": "白昼失温",
+    "summary": "旧设定文档补全，失踪角色线和补给站规则被重新合并。",
+    "tags": ["补档", "规则", "长线"],
+    "heat": 6930,
+    "likes": 241,
+    "dislikes": 19,
+    "trend": "down",
+    "approvedAt": "2026-07-07T23:10:00+08:00"
+  },
+  {
+    "id": "glass-city-night-run",
+    "title": "玻璃城夜跑任务",
+    "project": "霓虹玻璃城",
+    "summary": "匿名任务榜开放短篇接力，角色可通过夜跑路线触发临时关系。",
+    "tags": ["赛博", "短篇", "接力"],
+    "heat": 6280,
+    "likes": 218,
+    "dislikes": 14,
+    "trend": "up",
+    "approvedAt": "2026-07-06T20:45:00+08:00"
+  },
+  {
+    "id": "black-tide-census",
+    "title": "黑潮居民普查",
+    "project": "黑潮镇",
+    "summary": "镇民身份卡模板更新，新增外来者、返乡者和夜班岗位。",
+    "tags": ["小镇", "身份卡", "模板"],
+    "heat": 5720,
+    "likes": 189,
+    "dislikes": 22,
+    "trend": "flat",
+    "approvedAt": "2026-07-05T16:00:00+08:00"
+  }
+]

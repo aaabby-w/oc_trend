@@ -1,0 +1,6 @@
+window.OC_HOT_CONFIG = {
+  SUBMISSION_ENDPOINT: "",
+  VOTE_ENDPOINT: "",
+  OWNER_EMAIL: "",
+  SITE_NAME: "OC企划热搜榜"
+};
